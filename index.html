@@ -1,0 +1,119 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Draw route</title>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCG8IyXjPNuc0j4Qx80f3Z0Oct5ewH5p0Y&libraries=places"></script>
+        <style>
+            #map-canvas{
+                width: 100%;
+                height: 500px;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <div id="map-canvas"></div>
+        <div>
+            <p><i class="fas fa-road"></i> <span id="distance">0km</span></p>
+            <p><i class="fas fa-clock"></i> <span id="duration">0min</span></p>
+        </div>
+        
+        <script>
+            // initialization
+            const COMPNAY_NAME = "Company name";
+            const CURRENT_POSITION = "Your current position";
+            const COMPANY_POSITION = new google.maps.LatLng(31.625030, -7.992960);
+            
+            let clientPosition;
+            let map;
+            const directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
+            const infowindow = new google.maps.InfoWindow();
+            
+            // get current position
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position){
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    clientPosition = new google.maps.LatLng(pos.lat, pos.lng);
+                    
+                    calculateRoute();
+
+                }, function(error) {
+                    console.log(error);
+                });
+            }
+            
+            // init
+            function renderMap(){
+                const mapOptions = {
+                    zoom: 14,
+                    center: COMPANY_POSITION,
+                };
+
+                map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+                directionsDisplay.setMap(map);
+            }
+
+            function calculateRoute(){
+            
+                const directionService = new google.maps.DirectionsService();
+
+                const request = {
+                    origin: clientPosition,
+                    destination: COMPANY_POSITION,
+                    travelMode: 'DRIVING',
+                };
+
+                directionService.route(request, function(result, status){
+                    if(status === 'OK'){
+                        const leg = result.routes[0].legs[0];
+                        //console.log(leg);
+                        createMarker(leg.start_location,CURRENT_POSITION , leg.start_address, true);
+                        createMarker(leg.end_location, COMPNAY_NAME, leg.end_address, false);
+                        directionsDisplay.setDirections(result);
+                        
+                        //show distance and duration
+                        document.getElementById('distance').innerHTML = leg.distance.text;
+                        document.getElementById('duration').innerHTML = leg.duration.text;
+                    }
+                });
+
+            }
+            
+            function createMarker(latlng, title, content, startPos = false) {
+                const icon = startPos ? {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8.5,
+                        fillColor: "#F00",
+                        fillOpacity: 0.6,
+                        strokeWeight: 0.4
+                    } : undefined;
+                
+                let marker = new google.maps.Marker({
+                    position: latlng,
+                    title: title,
+                    map: map,
+                    icon: icon,
+                });
+
+                google.maps.event.addListener(marker, 'click', function () {
+                    infowindow.setContent(content);
+                    infowindow.open(map, marker);
+                });
+            }
+            
+            renderMap();
+            
+        </script>
+    </body>
+</html>
