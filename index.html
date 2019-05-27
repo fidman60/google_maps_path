@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCG8IyXjPNuc0j4Qx80f3Z0Oct5ewH5p0Y&libraries=places"></script>
         <style>
-            #map-canvas{
+            #map-canvas {
                 width: 100%;
                 height: 500px;
             }
@@ -27,8 +27,10 @@
         <script>
             // initialization
             const COMPNAY_NAME = "Company name";
-            const CURRENT_POSITION = "Your current position";
+            const CURRENT_POSITION_TITLE = "Your current position";
             const COMPANY_POSITION = new google.maps.LatLng(31.625030, -7.992960);
+            const COMPANY_ADDRESS = "default address";
+            
             
             let clientPosition;
             let map;
@@ -48,6 +50,7 @@
                     calculateRoute();
 
                 }, function(error) {
+                    createMarker(COMPANY_POSITION, COMPNAY_NAME, COMPANY_ADDRESS, false);
                     console.log(error);
                 });
             }
@@ -78,7 +81,7 @@
                     if(status === 'OK'){
                         const leg = result.routes[0].legs[0];
                         //console.log(leg);
-                        createMarker(leg.start_location,CURRENT_POSITION , leg.start_address, true);
+                        createMarker(leg.start_location,CURRENT_POSITION_TITLE , leg.start_address, true);
                         createMarker(leg.end_location, COMPNAY_NAME, leg.end_address, false);
                         directionsDisplay.setDirections(result);
                         
